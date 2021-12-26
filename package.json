@@ -1,0 +1,38 @@
+{
+  "name": "soccer",
+  "version": "1.0.0",
+  "description": "API for soccer online game manager",
+  "main": "index.js",
+  "scripts": {
+    "lint:check": "eslint",
+    "lint:check:all": "eslint .",
+    "lint": "eslint --fix",
+    "start": "node index.js",
+    "watch": "nodemon index.js | pino-pretty",
+    "test": "npm run lint:check:all"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.toptal.com/screening/Saurabh-Thakur.git"
+  },
+  "author": "Saurabh Thakur",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.2",
+    "joi": "^17.5.0",
+    "pino": "^7.6.1",
+    "pino-http": "^6.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "nodemon": "^2.0.15",
+    "pino-pretty": "^7.3.0",
+    "prettier": "^2.5.1"
+  }
+}
