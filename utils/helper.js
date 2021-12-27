@@ -7,12 +7,35 @@ function createResponse(success, errors, data, errorType) {
     };
 }
 
+function errorResponse(error) {
+    let errorMessage = 'InternalError';
+    let statusCode = 500;
+    if (error instanceof ServerError) {
+        errorMessage = error.clientError;
+        statusCode = error.statusCode;
+    }
+    const response = createResponse(false, [errorMessage]);
+    return { statusCode, response };
+}
+
 const validationTypes = {
     body: 'body',
     params: 'params',
     query: 'query',
     headers: 'headers'
 };
+
+class ServerError extends Error {
+    constructor(internalError, statusCode, clientError) {
+        super(internalError);
+        this.statusCode = statusCode;
+        this.clientError = clientError || internalError;
+    }
+}
+
+function isDuplicateKeyError(error) {
+    return /E11000 duplicate key/.test(error);
+}
 
 /**
  * This function acts like a higher order function which wraps the main controller
@@ -62,5 +85,8 @@ function verifyRequestSchema(controller, schemaValidator) {
 
 module.exports = {
     createResponse,
-    verifyRequestSchema
+    errorResponse,
+    isDuplicateKeyError,
+    verifyRequestSchema,
+    ServerError
 };

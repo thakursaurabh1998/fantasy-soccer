@@ -1,11 +1,17 @@
+const config = require('./config');
+const connections = require('./utils/connections');
 const server = require('./app/server');
 const { logger } = require('./utils/logger');
 
-server.start();
+const connectionOptions = {
+    mongo: config.database
+};
+
+connections.init(connectionOptions).then(server.start).catch(logger.fatal);
 
 function handleKillSignals(signal) {
     logger.info(`${signal} SIGNAL RECEIVED`);
-    server.stop();
+    connections.close().then(server.stop).catch(logger.fatal);
     logger.info('HTTP Server closed');
 }
 
