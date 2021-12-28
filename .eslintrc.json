@@ -4,12 +4,20 @@
         "es2021": true,
         "node": true
     },
-    "extends": ["standard", "prettier"],
-    "plugins": ["prettier"],
+    "extends": ["standard", "prettier", "plugin:jest/recommended"],
+    "plugins": ["prettier", "jest"],
     "parserOptions": {
         "ecmaVersion": "latest"
     },
     "rules": {
         "prettier/prettier": ["error"]
-    }
+    },
+    "overrides": [
+        {
+            "files": ["**/*.test.js"],
+            "env": {
+                "jest": true
+            }
+        }
+    ]
 }

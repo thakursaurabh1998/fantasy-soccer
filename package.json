@@ -4,12 +4,13 @@
   "description": "API for soccer online game manager",
   "main": "index.js",
   "scripts": {
-    "lint:check": "eslint",
-    "lint:check:all": "eslint .",
-    "lint": "eslint --fix",
+    "lint:check": "npx eslint",
+    "lint:check:all": "npx eslint .",
+    "lint": "npx eslint --fix",
     "start": "node index.js",
-    "watch": "nodemon index.js | pino-pretty",
-    "test": "npm run lint:check:all"
+    "watch": "npx nodemon index.js | npx pino-pretty",
+    "test:unit": "npx jest",
+    "test": "npm run lint:check:all && npm run test:unit"
   },
   "repository": {
     "type": "git",
@@ -30,11 +31,14 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jest": "^25.3.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^5.2.0",
+    "jest": "^27.4.5",
     "nodemon": "^2.0.15",
     "pino-pretty": "^7.3.0",
-    "prettier": "^2.5.1"
+    "prettier": "^2.5.1",
+    "supertest": "^6.1.6"
   }
 }
