@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 
 const { logger } = require('./logger');
 
-function getMongoConnection(uri, options, showDebug = true) {
+function getMongoConnection(uri, showDebug = true) {
     const { connection } = mongoose;
     mongoose.Promise = global.Promise;
 
     mongoose.set('debug', showDebug);
-    mongoose.connect(uri, options, (err) => {
+    mongoose.connect(uri, (err) => {
         if (err) {
             logger.fatal(err);
         }
@@ -19,7 +19,7 @@ function getMongoConnection(uri, options, showDebug = true) {
 let dbConnection = null;
 
 function initMongoConnection(options) {
-    dbConnection = getMongoConnection(options.url);
+    dbConnection = getMongoConnection(options.url, options.showDebug);
     return new Promise((resolve) => {
         dbConnection.once('open', () => resolve(dbConnection));
         dbConnection.on('open', () => {

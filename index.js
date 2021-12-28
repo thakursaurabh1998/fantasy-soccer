@@ -1,7 +1,24 @@
 const config = require('./config');
 const connections = require('./utils/connections');
-const server = require('./app/server');
+const app = require('./app/server');
 const { logger } = require('./utils/logger');
+
+let serverConnection = null;
+
+const server = {
+    start: () => {
+        serverConnection = app.listen(config.server.port);
+        logger.info(`API running on port - ${config.server.port}`);
+    },
+
+    // manage graceful shutdown with this function
+    stop: () => {
+        if (!serverConnection) {
+            throw new Error('Server not started yet');
+        }
+        serverConnection.close();
+    }
+};
 
 const connectionOptions = {
     mongo: config.database
