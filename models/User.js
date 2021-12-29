@@ -25,7 +25,7 @@ userSchema.statics.verifyCredentials = async function (email, password) {
     const user = await this.findOne({ email });
 
     if (!user) {
-        return false;
+        return { isUserVerified: false };
     }
 
     const { salt, password: key } = user;
@@ -37,7 +37,7 @@ userSchema.statics.verifyCredentials = async function (email, password) {
     // explained: https://en.wikipedia.org/wiki/Timing_attack
     const match = timingSafeEqual(hashedBuffer, keyBuffer);
 
-    return match;
+    return { isUserVerified: match, user };
 };
 
 userSchema.pre('save', function (next) {

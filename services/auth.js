@@ -1,14 +1,33 @@
+const jwt = require('jsonwebtoken');
+
+const config = require('../config');
 const User = require('../models/User');
 const { ServerError, isDuplicateKeyError } = require('../utils/helper');
 
-async function verifyCredentials(email, password) {
-    const isUserVerified = await User.verifyCredentials(email, password);
+function createAccessToken(user) {
+    const { email, name } = user;
+    return jwt.sign({ email, name }, config.auth.secret, { expiresIn: config.auth.ttl });
+}
 
-    if (isUserVerified) {
-        return true;
+function verifyToken(token) {
+    try {
+        const decoded = jwt.verify(token, config.auth.secret);
+        return { isVerified: true, decoded };
+    } catch (error) {
+        return { isVerified: false };
+    }
+}
+
+async function verifyCredentialsAndCreateToken(email, password) {
+    const { isUserVerified, user } = await User.verifyCredentials(email, password);
+
+    if (!isUserVerified) {
+        throw new ServerError('Verification failed', 401);
     }
 
-    throw new ServerError('Verification failed', 401);
+    const accessToken = createAccessToken(user);
+
+    return { isUserVerified, accessToken };
 }
 
 async function createUserProfile(email, password) {
@@ -23,6 +42,7 @@ async function createUserProfile(email, password) {
 }
 
 module.exports = {
-    verifyCredentials,
+    verifyCredentialsAndCreateToken,
+    verifyToken,
     createUserProfile
 };

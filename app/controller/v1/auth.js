@@ -1,7 +1,6 @@
-const { auth: authService } = require('../../../services');
-const { verifyRequestSchema, createResponse, errorResponse } = require('../../../utils/helper');
-const { logger } = require('../../../utils/logger');
 const { auth } = require('../../request-schema/v1');
+const { auth: authService } = require('../../../services');
+const { verifyRequestSchema, createResponse, ServerError } = require('../../../utils/helper');
 
 module.exports = {
     signup: verifyRequestSchema(async (req, res, next) => {
@@ -25,4 +24,17 @@ module.exports = {
             next(error);
         }
     }, auth.login),
+
+    verifyToken: (req, res, next) => {
+        const bearerToken = req.header('authorization')?.substring(7);
+
+        const { isVerified, decoded: userData } = authService.verifyToken(bearerToken);
+
+        if (isVerified) {
+            res.locals.user = userData;
+            next();
+        } else {
+            next(new ServerError('User not verified', 401));
+        }
+    }
 };
