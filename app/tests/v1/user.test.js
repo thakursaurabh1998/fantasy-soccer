@@ -1,5 +1,6 @@
 /* eslint-disable jest/expect-expect */
 const agent = require('supertest');
+const Player = require('../../../models/Player');
 const Team = require('../../../models/Team');
 const User = require('../../../models/User');
 const { teams, players } = require('../../../utils/constants');
@@ -76,6 +77,43 @@ describe('Test user APIs', () => {
 
                     expect(team.country).toBe(newCountry);
                     expect(team.name).toBe(newTeamName);
+                });
+        });
+    });
+
+    describe('POST /user/player', () => {
+        it('fails if playerId is invalid (player not present for this user)', async () => {
+            return agent(app)
+                .post('/v1/user/player')
+                .set('Authorization', `Bearer ${token}`)
+                .send({ playerId: '61ccce112f6123547a94c643' })
+                .expect(400)
+                .expect({ success: false, errors: ['Player not found for the user'] });
+        });
+
+        it('updates player meta correctly', async () => {
+            const newCountry = 'India';
+            const newFirstName = 'Steve';
+            const newLastName = 'Burr';
+
+            const player = await Player.findOne();
+
+            return agent(app)
+                .post('/v1/user/player')
+                .set('Authorization', `Bearer ${token}`)
+                .send({
+                    playerId: player._id,
+                    firstName: newFirstName,
+                    lastName: newLastName,
+                    country: newCountry
+                })
+                .expect(200)
+                .expect({ success: true })
+                .then(async () => {
+                    const updatedPlayer = await Player.findOne({ _id: player._id });
+                    expect(updatedPlayer.country).toBe(newCountry);
+                    expect(updatedPlayer.firstName).toBe(newFirstName);
+                    expect(updatedPlayer.lastName).toBe(newLastName);
                 });
         });
     });

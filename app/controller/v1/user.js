@@ -1,5 +1,5 @@
 const { user } = require('../../request-schema/v1');
-const { team: teamService } = require('../../../services');
+const { team: teamService, player: playerService } = require('../../../services');
 const { verifyRequestSchema, createResponse } = require('../../../utils/helper');
 
 module.exports = {
@@ -21,5 +21,16 @@ module.exports = {
         } catch (error) {
             next(error);
         }
-    }, user.updateTeam)
+    }, user.updateTeam),
+
+    updatePlayer: verifyRequestSchema(async (req, res, next) => {
+        const { user } = res.locals;
+        const { playerId, ...updates } = req.body;
+        try {
+            await playerService.updatePlayerData(user, playerId, updates);
+            res.json(createResponse(true));
+        } catch (error) {
+            next(error);
+        }
+    }, user.updatePlayer)
 };

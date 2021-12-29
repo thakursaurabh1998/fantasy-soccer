@@ -1,6 +1,6 @@
 const Player = require('../models/Player');
 const { playerTypes, players } = require('../utils/constants');
-const { getRandomInt } = require('../utils/helper');
+const { getRandomInt, ServerError } = require('../utils/helper');
 
 function createPlayer(options = {}, index) {
     const {
@@ -38,6 +38,20 @@ async function generatePlayers(user) {
     return saveResponse.result.insertedIds.map((insertedId) => insertedId._id);
 }
 
+async function updatePlayerData(user, playerId, updates) {
+    const { firstName, lastName, country } = updates;
+
+    const updateStatus = await Player.updateOne(
+        { owner: user.userId, _id: playerId },
+        { firstName, lastName, country }
+    );
+
+    if (updateStatus.matchedCount < 1) {
+        throw new ServerError('Player not found for the user', 400);
+    }
+}
+
 module.exports = {
-    generatePlayers
+    generatePlayers,
+    updatePlayerData
 };
