@@ -71,7 +71,14 @@ async function generateTeam(user) {
     return team;
 }
 
+async function updateTeamData(user, updates) {
+    const { name, country } = updates;
+
+    return Team.updateOne({ owner: user.userId }, { name, country });
+}
+
 module.exports = {
     fetchTeamData,
-    generateTeam
+    generateTeam,
+    updateTeamData
 };

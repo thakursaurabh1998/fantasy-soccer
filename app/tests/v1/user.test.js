@@ -1,4 +1,7 @@
+/* eslint-disable jest/expect-expect */
 const agent = require('supertest');
+const Team = require('../../../models/Team');
+const User = require('../../../models/User');
 const { teams, players } = require('../../../utils/constants');
 
 const app = require('../../server');
@@ -52,6 +55,27 @@ describe('Test user APIs', () => {
                         ])
                     });
                     expect(response.body.data.team.players.length).toBe(20);
+                });
+        });
+    });
+
+    describe('POST /user/team', () => {
+        it('updates name and country of the team correctly', () => {
+            const newTeamName = 'SuperHuman';
+            const newCountry = 'India';
+
+            return agent(app)
+                .post('/v1/user/team')
+                .set('Authorization', `Bearer ${token}`)
+                .send({ name: newTeamName, country: newCountry })
+                .expect(200)
+                .expect({ success: true })
+                .then(async () => {
+                    const user = await User.findOne({ email: credentials.email });
+                    const team = await Team.findOne({ owner: user._id });
+
+                    expect(team.country).toBe(newCountry);
+                    expect(team.name).toBe(newTeamName);
                 });
         });
     });

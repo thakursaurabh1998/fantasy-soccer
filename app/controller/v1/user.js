@@ -11,5 +11,15 @@ module.exports = {
         } catch (error) {
             next(error);
         }
-    }, user.fetchTeam)
+    }),
+
+    updateTeam: verifyRequestSchema(async (req, res, next) => {
+        const { user } = res.locals;
+        try {
+            await teamService.updateTeamData(user, req.body);
+            res.json(createResponse(true));
+        } catch (error) {
+            next(error);
+        }
+    }, user.updateTeam)
 };
