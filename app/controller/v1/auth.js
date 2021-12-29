@@ -1,12 +1,12 @@
 const { auth } = require('../../request-schema/v1');
-const { auth: authService } = require('../../../services');
+const { auth: authService, user: userService } = require('../../../services');
 const { verifyRequestSchema, createResponse, ServerError } = require('../../../utils/helper');
 
 module.exports = {
     signup: verifyRequestSchema(async (req, res, next) => {
         const { email, password } = req.body;
         try {
-            await authService.createUserProfile(email, password);
+            await userService.createAndSetupUser(email, password);
             res.json(createResponse(true));
         } catch (error) {
             next(error);

@@ -65,7 +65,12 @@ describe('Test auth signup API', () => {
                 .post('/v1/auth/login')
                 .send(requestBody)
                 .expect(200)
-                .expect({ success: true, errors: null, data: { verified: true } });
+                .then((response) => {
+                    expect(response.body.success).toBe(true);
+                    expect(response.body.data).toEqual(
+                        expect.objectContaining({ verified: true, accessToken: expect.anything() })
+                    );
+                });
         });
 
         it('fails if the user credentials are wrong', () => {

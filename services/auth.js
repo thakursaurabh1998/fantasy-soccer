@@ -2,11 +2,11 @@ const jwt = require('jsonwebtoken');
 
 const config = require('../config');
 const User = require('../models/User');
-const { ServerError, isDuplicateKeyError } = require('../utils/helper');
+const { ServerError } = require('../utils/helper');
 
 function createAccessToken(user) {
-    const { email, name } = user;
-    return jwt.sign({ email, name }, config.auth.secret, { expiresIn: config.auth.ttl });
+    const { email, name, _id: userId } = user;
+    return jwt.sign({ email, name, userId }, config.auth.secret, { expiresIn: config.auth.ttl });
 }
 
 function verifyToken(token) {
@@ -30,19 +30,7 @@ async function verifyCredentialsAndCreateToken(email, password) {
     return { isUserVerified, accessToken };
 }
 
-async function createUserProfile(email, password) {
-    const user = new User({ email, password });
-    try {
-        await user.save();
-    } catch (error) {
-        if (isDuplicateKeyError(error.message)) {
-            throw new ServerError(error, 400, 'User already exists');
-        }
-    }
-}
-
 module.exports = {
     verifyCredentialsAndCreateToken,
-    verifyToken,
-    createUserProfile
+    verifyToken
 };

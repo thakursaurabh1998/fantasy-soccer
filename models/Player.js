@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const { playerType } = require('../utils/constants');
+const { playerTypes } = require('../utils/constants');
 
 const { ObjectId } = mongoose.Schema;
 
@@ -13,7 +13,7 @@ const playerSchema = mongoose.Schema(
         type: {
             required: true,
             type: String,
-            enum: Object.values(playerType)
+            enum: Object.values(playerTypes)
         },
         value: Number,
         team: {
@@ -27,6 +27,11 @@ const playerSchema = mongoose.Schema(
     },
     { timestamps: true }
 );
+
+playerSchema.methods.updateTeam = function (newTeam) {
+    this.team = newTeam;
+    return this.save();
+};
 
 const collection = 'players';
 const Player = mongoose.model('Player', playerSchema, collection);

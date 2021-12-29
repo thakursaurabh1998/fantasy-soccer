@@ -1,4 +1,4 @@
-const playerType = {
+const playerTypes = {
     goalkeeper: 'goalkeeper',
     defender: 'defender',
     midfielder: 'midfielder',
@@ -10,7 +10,24 @@ const transferStatus = {
     COMPLETE: 'COMPLETE'
 };
 
+const players = {
+    initialValue: 1000000,
+    initialCount: 20,
+    initialCountByType: {
+        [playerTypes.attacker]: 5,
+        [playerTypes.defender]: 6,
+        [playerTypes.goalkeeper]: 3,
+        [playerTypes.midfielder]: 6
+    }
+};
+
+const teams = {
+    initialBudget: 5000000
+};
+
 module.exports = {
-    playerType,
-    transferStatus
+    playerTypes,
+    transferStatus,
+    players,
+    teams
 };

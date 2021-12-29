@@ -37,6 +37,12 @@ function isDuplicateKeyError(error) {
     return /E11000 duplicate key/.test(error);
 }
 
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 /**
  * This function acts like a higher order function which wraps the main controller
  * and helps in validation of the request body, param or/and query before
@@ -88,5 +94,6 @@ module.exports = {
     errorResponse,
     isDuplicateKeyError,
     verifyRequestSchema,
-    ServerError
+    ServerError,
+    getRandomInt
 };
