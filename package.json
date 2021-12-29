@@ -8,7 +8,7 @@
     "lint:check:all": "npx eslint .",
     "lint": "npx eslint --fix",
     "start": "node index.js",
-    "watch": "npx nodemon index.js | npx pino-pretty",
+    "watch": "npx nodemon --inspect index.js | npx pino-pretty",
     "test:unit": "npx jest",
     "test": "npm run lint:check:all && npm run test:unit"
   },

@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const routes = require('./routes');
-const { createResponse } = require('../utils/helper');
+const { createResponse, errorResponse } = require('../utils/helper');
 const { requestLogger, logger } = require('../utils/logger');
 
 const app = express();
@@ -21,13 +21,13 @@ app.use((_req, res) => {
 });
 
 app.use((err, _req, res, _next) => {
-    logger.fatal({
-        type: 'INTERNAL_SERVER_ERROR',
-        err
-    });
-    res.status(500).json({
-        data: "Something isn't right"
-    });
+    const { statusCode, response } = errorResponse(err);
+    if (statusCode >= 500) {
+        logger.error(err);
+    } else {
+        logger.info(err);
+    }
+    res.status(statusCode).json(response);
 });
 
 module.exports = app;

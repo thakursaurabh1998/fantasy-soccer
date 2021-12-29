@@ -3,11 +3,21 @@ const mongoose = require('mongoose');
 const config = require('../../config');
 const connections = require('../../utils/connections');
 
-function prepareDb() {
+async function prepareDb() {
     const connectionOptions = {
         mongo: { ...config.database, showDebug: false }
     };
-    return connections.init(connectionOptions);
+
+    const dbConnection = await connections.init(connectionOptions);
+
+    // this is a hack to ensure indexes are created before running tests
+    await new Promise((resolve) => {
+        setTimeout(() => {
+            resolve();
+        }, 1000);
+    });
+
+    return dbConnection;
 }
 
 async function dropCollections() {
