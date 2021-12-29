@@ -1,10 +1,11 @@
 /* eslint-disable jest/expect-expect */
 const agent = require('supertest');
+const Player = require('../../../models/Player');
+const Team = require('../../../models/Team');
 const User = require('../../../models/User');
 
 const app = require('../../server');
 const { prepareDb, dropCollections } = require('../dbHelper');
-require('../dbHelper');
 
 beforeAll(async () => {
     await prepareDb();
@@ -14,9 +15,9 @@ afterAll(async () => {
     await dropCollections();
 });
 
-describe('Test auth signup API', () => {
+describe('Test auth APIs', () => {
     const requestBody = {
-        email: 'abc@gmail.com',
+        email: 'authtest@gmail.com',
         password: 'hello123'
     };
     describe('POST /auth/signup', () => {
@@ -32,15 +33,20 @@ describe('Test auth signup API', () => {
                     errorType: 'ValidationError'
                 });
         });
-        it('creates new user successfully', () => {
+        it('creates new user and generate team data', () => {
             return agent(app)
                 .post('/v1/auth/signup')
                 .send(requestBody)
                 .expect(200)
                 .expect({ success: true })
                 .then(async () => {
-                    const userCount = await User.findOne({ email: requestBody.email }).count();
-                    expect(userCount).toBe(1);
+                    const user = await User.find({ email: requestBody.email });
+                    const team = await Team.find({ owner: user[0]._id });
+                    const players = await Player.find({ owner: user[0]._id, team: team[0]._id });
+
+                    expect(user.length).toBe(1);
+                    expect(team.length).toBe(1);
+                    expect(players.length).toBe(20);
                 });
         });
 
@@ -55,7 +61,7 @@ describe('Test auth signup API', () => {
 
     describe('POST /auth/login', () => {
         beforeAll(async () => {
-            if ((await User.count()) < 1) {
+            if ((await User.find({ email: requestBody.email }).count()) < 1) {
                 await new User(requestBody).save();
             }
         });

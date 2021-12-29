@@ -9,7 +9,7 @@
     "lint": "npx eslint --fix",
     "start": "node index.js",
     "watch": "npx nodemon --inspect index.js | npx pino-pretty",
-    "test:unit": "npx jest",
+    "test:unit": "npx jest --runInBand",
     "test": "npm run lint:check:all && npm run test:unit"
   },
   "repository": {
