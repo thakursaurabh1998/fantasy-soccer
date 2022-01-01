@@ -23,6 +23,10 @@ const playerSchema = mongoose.Schema(
         owner: {
             type: ObjectId,
             ref: 'User'
+        },
+        activeTransfer: {
+            type: ObjectId,
+            ref: 'Transfer'
         }
     },
     { timestamps: true }

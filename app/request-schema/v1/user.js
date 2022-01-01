@@ -14,5 +14,11 @@ module.exports = {
             lastName: Joi.string(),
             country: Joi.string()
         })
+    },
+    transferPlayer: {
+        body: Joi.object({
+            playerId: Joi.string().required(),
+            askingPrice: Joi.number().required()
+        })
     }
 };

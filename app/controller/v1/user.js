@@ -32,5 +32,27 @@ module.exports = {
         } catch (error) {
             next(error);
         }
-    }, user.updatePlayer)
+    }, user.updatePlayer),
+
+    transferPlayer: verifyRequestSchema(async (req, res, next) => {
+        const { user } = res.locals;
+        const { playerId, ...transferOptions } = req.body;
+        try {
+            const transfer = await playerService.openTransfer(user, playerId, transferOptions);
+            res.json(createResponse(true, null, { transfer }));
+        } catch (error) {
+            next(error);
+        }
+    }, user.transferPlayer),
+
+    buyPlayer: verifyRequestSchema(async (req, res, next) => {
+        const { user } = res.locals;
+        const { playerId } = req.body;
+        try {
+            await playerService.buy(user, playerId);
+            res.json(createResponse(true));
+        } catch (error) {
+            next(error);
+        }
+    }, user.buyPlayer)
 };

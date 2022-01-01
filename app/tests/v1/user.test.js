@@ -115,4 +115,69 @@ describe('Test user APIs', () => {
                 });
         });
     });
+
+    describe('PUT /user/transfer-player', () => {
+        let player = null;
+        let user = null;
+        let expectedTransfer = null;
+
+        beforeAll(async () => {
+            player = await Player.findOne();
+            user = await User.findOne({ email: credentials.email });
+            expectedTransfer = {
+                player: player._id.toString(),
+                seller: user._id.toString(),
+                askingPrice: 1234560,
+                status: 'PENDING',
+                transferId: expect.any(String)
+            };
+        });
+
+        it('fails if asking price is less than player value', () => {
+            return agent(app)
+                .put('/v1/user/transfer-player')
+                .set('Authorization', `Bearer ${token}`)
+                .send({ playerId: player._id, askingPrice: 10000 })
+                .expect(400)
+                .then((response) => {
+                    expect(response.body.success).toBe(false);
+                    expect(response.body.errors).toEqual([
+                        'Asking Price is less than player value'
+                    ]);
+                });
+        });
+
+        it('returns the correct response', async () => {
+            return agent(app)
+                .put('/v1/user/transfer-player')
+                .set('Authorization', `Bearer ${token}`)
+                .send({ playerId: player._id, askingPrice: 1234560 })
+                .expect(200)
+                .then((response) => {
+                    expect(response.body.success).toBe(true);
+                    expect(response.body.data).toEqual({
+                        transfer: expectedTransfer
+                    });
+                });
+        });
+
+        it('adds the player in the transfer list', async () => {
+            const transfers = await Transfer.find({ seller: user._id }).lean();
+
+            expect(transfers.length).toBe(1);
+            expect(transfers[0]).toEqual(
+                expect.objectContaining({
+                    player: player._id,
+                    seller: user._id,
+                    askingPrice: 1234560,
+                    status: 'PENDING'
+                })
+            );
+        });
+
+        it('asking price is set for a player', async () => {
+            const transfers = await Transfer.find({ seller: user._id });
+            expect(transfers[0].askingPrice).toBe(expectedTransfer.askingPrice);
+        });
+    });
 });

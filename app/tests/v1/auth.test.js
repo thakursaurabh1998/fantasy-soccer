@@ -1,8 +1,8 @@
 /* eslint-disable jest/expect-expect */
 const agent = require('supertest');
-const { Player, Team, User } = require('../../../models');
 
 const app = require('../../server');
+const { Player, Team, User } = require('../../../models');
 const { prepareDb, dropCollections } = require('../dbHelper');
 
 beforeAll(async () => {
