@@ -133,10 +133,10 @@ function playerTransferList(pageOptions) {
     ]);
 }
 
-async function transfer(user, playerId) {
+async function buy(user, playerId) {
     const { userId: buyerId } = user;
     const [player, transferData, buyerTeam] = await Promise.all([
-        Player.findOne({ _id: playerId }),
+        Player.findOne({ _id: playerId, activeTransfer: { $exists: true } }),
         Transfer.findOne({
             player: playerId,
             status: transferStatus.PENDING
@@ -144,37 +144,46 @@ async function transfer(user, playerId) {
         Team.findOne({ owner: buyerId })
     ]);
 
+    if (!player) {
+        throw new ServerError('Player not available for buying', 400);
+    }
     if (transferData.askingPrice > buyerTeam.budget) {
         throw new ServerError('Team budget is less than player asking price', 400);
     }
+
+    const sellerTeam = await Team.findOne({ owner: transferData.seller });
 
     // update the player transfer status
     transferData.status = transferStatus.COMPLETE;
     // subtract the player price from the buyer team budget
     buyerTeam.budget -= transferData.askingPrice;
+    // add the selling price to the budget of seller team
+    sellerTeam.budget += transferData.askingPrice;
+    // reduce the team value with the original player value
+    sellerTeam.value -= player.value;
+    // update buyer value in transfer data
+    transferData.buyer = buyerId;
 
     // calculate the new increase player value
     const newPlayerValue = increasedPlayerValue(transferData.askingPrice);
     buyerTeam.value += newPlayerValue;
+    // placement of this matters
     player.value = newPlayerValue;
 
+    // update player owner and team data
+    player.team = buyerTeam;
+    player.owner = buyerId;
+
     await withTransaction(async () => {
-        await Player.updateOne(
-            {
-                _id: playerId
-            },
-            {
-                owner: buyerId,
-                team: buyerTeam
-            }
-        );
         await transferData.save();
         await player.save();
+        await buyerTeam.save();
+        await sellerTeam.save();
     });
 }
 
 module.exports = {
-    transfer,
+    buy,
     generatePlayers,
     openTransfer,
     playerTransferList,

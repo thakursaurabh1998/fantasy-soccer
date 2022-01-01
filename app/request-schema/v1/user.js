@@ -20,5 +20,10 @@ module.exports = {
             playerId: Joi.string().required(),
             askingPrice: Joi.number().required()
         })
+    },
+    buyPlayer: {
+        body: Joi.object({
+            playerId: Joi.string().required()
+        })
     }
 };
