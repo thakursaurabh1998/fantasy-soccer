@@ -14,28 +14,18 @@ const teamSchema = mongoose.Schema(
         value: Number,
         country: String,
         name: String,
-        budget: Number,
-        players: [
-            {
-                type: ObjectId,
-                ref: 'Player'
-            }
-        ]
+        budget: Number
     },
     { timestamps: true }
 );
 
 teamSchema.methods.addPlayersBulk = async function (playerIds) {
-    this.players.push(...playerIds);
     // add team to the player object also
-    return Promise.all([this.save(), Player.updateMany({ _id: playerIds }, { team: this })]);
+    return Player.updateMany({ _id: playerIds }, { team: this });
 };
 
 teamSchema.methods.removePlayers = function (playerIds) {
-    return Promise.all([
-        Team.updateOne({ _id: this._id }, { $pull: { players: { $in: playerIds } } }),
-        Player.updateMany({ _id: playerIds }, { team: null })
-    ]);
+    return Player.updateMany({ _id: playerIds }, { team: null });
 };
 
 const collection = 'teams';

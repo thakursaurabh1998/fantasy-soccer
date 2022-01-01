@@ -15,12 +15,12 @@ async function fetchTeamData(userId) {
         {
             $lookup: {
                 from: 'players',
-                let: { players: '$players' },
+                let: { teamId: '$_id' },
                 pipeline: [
                     {
                         $match: {
                             $expr: {
-                                $in: ['$_id', '$$players']
+                                $eq: ['$team', '$$teamId']
                             }
                         }
                     },
@@ -33,7 +33,8 @@ async function fetchTeamData(userId) {
                             age: 1,
                             country: 1,
                             type: 1,
-                            value: 1
+                            value: 1,
+                            activeTransfer: 1
                         }
                     }
                 ],
