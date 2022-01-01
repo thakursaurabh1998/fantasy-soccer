@@ -106,7 +106,31 @@ function increasedPlayerValue(oldPrice) {
 function playerTransferList(pageOptions) {
     const { count, page } = pageOptions;
     const skipDocuments = count * (page - 1);
-    return Transfer.find({ status: transferStatus.PENDING }).skip(skipDocuments).limit(count);
+    // return Transfer.find({ status: transferStatus.PENDING }).skip(skipDocuments).limit(count);
+    return Transfer.aggregate([
+        {
+            $match: {
+                status: transferStatus.PENDING
+            }
+        },
+        {
+            $skip: skipDocuments
+        },
+        {
+            $limit: count
+        },
+        {
+            $project: {
+                _id: 0,
+                transferId: '$_id',
+                player: 1,
+                seller: 1,
+                askingPrice: 1,
+                status: 1,
+                createdAt: 1
+            }
+        }
+    ]);
 }
 
 async function transfer(user, playerId) {
