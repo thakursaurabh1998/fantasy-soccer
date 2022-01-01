@@ -1,8 +1,6 @@
 /* eslint-disable jest/expect-expect */
 const agent = require('supertest');
-const Player = require('../../../models/Player');
-const Team = require('../../../models/Team');
-const User = require('../../../models/User');
+const { Player, Team, Transfer, User } = require('../../../models');
 const { teams, players } = require('../../../utils/constants');
 
 const app = require('../../server');

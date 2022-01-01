@@ -2,9 +2,8 @@ const {
     Types: { ObjectId }
 } = require('mongoose');
 
-const Team = require('../models/Team');
+const { Team } = require('../models');
 const { players, teams } = require('../utils/constants');
-require('../models/Player');
 
 async function fetchTeamData(userId) {
     const [team] = await Team.aggregate([

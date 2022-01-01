@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const { User } = require('../models');
 const { isDuplicateKeyError, ServerError } = require('../utils/helper');
 const { generatePlayers } = require('./player');
 const { generateTeam } = require('./team');

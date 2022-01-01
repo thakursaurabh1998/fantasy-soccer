@@ -1,8 +1,6 @@
 /* eslint-disable jest/expect-expect */
 const agent = require('supertest');
-const Player = require('../../../models/Player');
-const Team = require('../../../models/Team');
-const User = require('../../../models/User');
+const { Player, Team, User } = require('../../../models');
 
 const app = require('../../server');
 const { prepareDb, dropCollections } = require('../dbHelper');
@@ -33,6 +31,7 @@ describe('Test auth APIs', () => {
                     errorType: 'ValidationError'
                 });
         });
+
         it('creates new user and generate team data', () => {
             return agent(app)
                 .post('/v1/auth/signup')

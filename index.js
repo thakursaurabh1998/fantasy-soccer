@@ -1,3 +1,4 @@
+require('./models');
 const config = require('./config');
 const connections = require('./utils/connections');
 const app = require('./app/server');

@@ -1,5 +1,4 @@
-const Player = require('../models/Player');
-const { playerTypes, players } = require('../utils/constants');
+const { Player, Transfer } = require('../models');
 const { getRandomInt, ServerError } = require('../utils/helper');
 
 function createPlayer(options = {}, index) {
