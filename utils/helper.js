@@ -28,7 +28,7 @@ const validationTypes = {
 class ServerError extends Error {
     constructor(internalError, statusCode, clientError) {
         super(internalError);
-        this.statusCode = statusCode;
+        this.statusCode = statusCode || 500;
         this.clientError = clientError || internalError;
     }
 }

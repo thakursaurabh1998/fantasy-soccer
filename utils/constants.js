@@ -25,9 +25,14 @@ const teams = {
     initialBudget: 5000000
 };
 
+const errors = {
+    ActiveTransferExists: 'ActiveTransferExists'
+};
+
 module.exports = {
     playerTypes,
     transferStatus,
     players,
-    teams
+    teams,
+    errors
 };
