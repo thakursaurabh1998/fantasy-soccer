@@ -3,6 +3,12 @@ const { isDuplicateKeyError, ServerError } = require('../utils/helper');
 const { generatePlayers } = require('./player');
 const { generateTeam } = require('./team');
 
+/**
+ * Create user and generate default team and random players
+ * for initial setup
+ * @param {String} email
+ * @param {String} password
+ */
 async function createAndSetupUser(email, password) {
     try {
         const user = new User({ email, password });

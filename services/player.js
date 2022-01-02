@@ -7,6 +7,13 @@ const { getRandomInt, ServerError } = require('../utils/helper');
 
 const { ObjectId } = mongoose.Types;
 
+/**
+ * Create a player after taking options or use default
+ * values, used to create players after user signup
+ * @param {Object} options
+ * @param {Number} index
+ * @returns {Player}
+ */
 function createPlayer(options = {}, index) {
     const {
         firstName = `Default FN_${index}`,
@@ -28,6 +35,11 @@ function createPlayer(options = {}, index) {
     });
 }
 
+/**
+ * Generate random players and return inserted IDs
+ * @param {User} user
+ * @returns {Array<String>}
+ */
 async function generatePlayers(user) {
     let count = 1;
     const newPlayers = [];
@@ -43,6 +55,12 @@ async function generatePlayers(user) {
     return saveResponse.result.insertedIds.map((insertedId) => insertedId._id);
 }
 
+/**
+ * Update player meta fields
+ * @param {User} user
+ * @param {String} playerId
+ * @param {{ firstName: String, lastName: String, country: String }} updates
+ */
 async function updatePlayerData(user, playerId, updates) {
     const { firstName, lastName, country } = updates;
 
@@ -56,6 +74,13 @@ async function updatePlayerData(user, playerId, updates) {
     }
 }
 
+/**
+ * Open a transfer of a player
+ * @param {User} user
+ * @param {String} playerId
+ * @param {{ askingPrice: Number }} transferOptions
+ * @returns
+ */
 async function openTransfer(user, playerId, transferOptions) {
     const { userId } = user;
     const { askingPrice } = transferOptions;
@@ -96,6 +121,12 @@ async function openTransfer(user, playerId, transferOptions) {
     };
 }
 
+/**
+ * Increase the player value to a random
+ * percentage between 10 and 100
+ * @param {Number} oldPrice
+ * @returns {Number}
+ */
 function increasedPlayerValue(oldPrice) {
     const randomPercent = getRandomInt(10, 100);
     const newPrice = (oldPrice * (100 + randomPercent)) / 100;
@@ -103,6 +134,12 @@ function increasedPlayerValue(oldPrice) {
     return newPrice;
 }
 
+/**
+ * Get all open player transfers with page number
+ * and required document count
+ * @param {{ count: Number, page: Number }} pageOptions
+ * @returns {Array<Transfer>}
+ */
 function playerTransferList(pageOptions) {
     const { count, page } = pageOptions;
     const skipDocuments = count * (page - 1);
@@ -133,6 +170,13 @@ function playerTransferList(pageOptions) {
     ]);
 }
 
+/**
+ * Buys a specific player after doing all the validations
+ * Updates all dependent fields in Team and Player collections
+ * @param {User} user
+ * @param {String} playerId
+ * @returns {Player}
+ */
 async function buy(user, playerId) {
     const { userId: buyerId } = user;
     const [player, transferData, buyerTeam] = await Promise.all([

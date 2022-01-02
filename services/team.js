@@ -5,6 +5,11 @@ const {
 const { Team } = require('../models');
 const { players, teams } = require('../utils/constants');
 
+/**
+ * Return team data for a user
+ * @param {String} userId
+ * @returns {Object}
+ */
 async function fetchTeamData(userId) {
     const [team] = await Team.aggregate([
         {
@@ -58,6 +63,11 @@ async function fetchTeamData(userId) {
     return team;
 }
 
+/**
+ * Generate initial team for the user during signup
+ * @param {User} user
+ * @returns {Team}
+ */
 async function generateTeam(user) {
     const team = new Team({
         name: 'Default',
@@ -71,6 +81,12 @@ async function generateTeam(user) {
     return team;
 }
 
+/**
+ * Update meta data for a team
+ * @param {User} user
+ * @param {{ name: String, country: String }} updates
+ * @returns {Team}
+ */
 async function updateTeamData(user, updates) {
     const { name, country } = updates;
 
