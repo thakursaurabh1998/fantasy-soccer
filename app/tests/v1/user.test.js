@@ -1,9 +1,9 @@
 /* eslint-disable jest/expect-expect */
 const agent = require('supertest');
-const { Player, Team, Transfer, User } = require('../../../models');
-const { teams, players } = require('../../../utils/constants');
 
 const app = require('../../server');
+const { Player, Team, Transfer, User } = require('../../../models');
+const { teams, players, transferStatus } = require('../../../utils/constants');
 const { prepareDb, dropCollections } = require('../dbHelper');
 const { signupAndLogin } = require('../helpers');
 
@@ -178,6 +178,146 @@ describe('Test user APIs', () => {
         it('asking price is set for a player', async () => {
             const transfers = await Transfer.find({ seller: user._id });
             expect(transfers[0].askingPrice).toBe(expectedTransfer.askingPrice);
+        });
+    });
+
+    describe('PUT /user/buy-player', () => {
+        let buyerToken = null;
+        let initialPlayerObject = null;
+        let buyer = null;
+        let buyerTeam = null;
+        let transfer = null;
+        const buyerCredentials = {
+            email: 'buyercredentials@gmail.com',
+            password: 'hello123'
+        };
+
+        beforeAll(async () => {
+            initialPlayerObject = await Player.findOne({ activeTransfer: { $exists: true } });
+            buyerToken = await signupAndLogin(buyerCredentials);
+            buyer = await User.findOne({ email: buyerCredentials.email });
+            buyerTeam = await Team.findOne({ owner: buyer });
+            transfer = await Transfer.findOne({
+                seller: initialPlayerObject.owner,
+                status: transferStatus.PENDING
+            });
+        });
+
+        it('fails if player not up for transfer', async () => {
+            const notForTransferPlayer = await Player.findOne({
+                activeTransfer: { $exists: false }
+            });
+
+            return agent(app)
+                .put('/v1/user/buy-player')
+                .set('Authorization', `Bearer ${buyerToken}`)
+                .send({ playerId: notForTransferPlayer._id })
+                .expect(400)
+                .expect((response) => {
+                    expect(response.body.success).toBe(false);
+                    expect(response.body.errors).toEqual(['Player not available for buying']);
+                });
+        });
+
+        it('should not let you buy your own player on transfer list', async () => {
+            const owner = await User.findOne({ email: credentials.email });
+            const ownPlayerOnTransferList = await Player.findOne({ owner });
+
+            return agent(app)
+                .put('/v1/user/buy-player')
+                .set('Authorization', `Bearer ${token}`)
+                .send({ playerId: ownPlayerOnTransferList._id })
+                .expect(400)
+                .expect((response) => {
+                    expect(response.body.success).toBe(false);
+                    expect(response.body.errors).toEqual(["Can't buy your own player"]);
+                });
+        });
+
+        it('should not let you buy if budget is less than asking price', async () => {
+            await Team.updateOne({ owner: buyer }, { $set: { budget: 0 } });
+            return agent(app)
+                .put('/v1/user/buy-player')
+                .set('Authorization', `Bearer ${buyerToken}`)
+                .send({ playerId: initialPlayerObject._id })
+                .expect(400)
+                .expect((response) => {
+                    expect(response.body.success).toBe(false);
+                    expect(response.body.errors).toEqual([
+                        'Team budget is less than player asking price'
+                    ]);
+                });
+        });
+
+        it('does the API call correctly', async () => {
+            await Team.updateOne({ owner: buyer }, { $set: { budget: teams.initialBudget } });
+
+            return agent(app)
+                .put('/v1/user/buy-player')
+                .set('Authorization', `Bearer ${buyerToken}`)
+                .send({ playerId: initialPlayerObject._id })
+                .expect(200)
+                .expect((response) => {
+                    expect(response.body.success).toBe(true);
+                    expect(response.body.data.player).toMatchObject({
+                        playerId: initialPlayerObject._id,
+                        age: expect.any(Number),
+                        country: 'India',
+                        firstName: 'Steve',
+                        lastName: 'Burr',
+                        owner: buyer._id,
+                        team: buyerTeam._id,
+                        type: expect.stringMatching(/^(attacker|defender|goalkeeper|midfielder)/),
+                        updatedAt: expect.any(String),
+                        value: expect.any(Number)
+                    });
+                });
+        });
+
+        it('updates the player team data', async () => {
+            const updatedPlayer = await Player.findOne({
+                _id: initialPlayerObject._id,
+                activeTransfer: { $exists: false }
+            });
+            expect(updatedPlayer.owner).toEqual(buyer._id);
+            expect(updatedPlayer.team).toEqual(buyerTeam._id);
+        });
+
+        it('player value is increased between 10-100 percent', async () => {
+            const updatedPlayer = await Player.findOne({
+                _id: initialPlayerObject._id,
+                activeTransfer: { $exists: false }
+            });
+
+            const { value: playerUpdatedValue } = updatedPlayer;
+            const { value: playerOldValue } = initialPlayerObject;
+
+            const increasedPercentage =
+                ((playerUpdatedValue - playerOldValue) / playerOldValue) * 100;
+
+            expect(increasedPercentage).toBeGreaterThanOrEqual(10);
+            expect(increasedPercentage).toBeLessThanOrEqual(100);
+        });
+
+        it('updates the seller and buyer team budget', async () => {
+            const sellerTeam = await Team.findOne({ owner: initialPlayerObject.owner });
+            const updatedBuyerTeam = await Team.findById(buyerTeam._id);
+
+            expect(sellerTeam.budget).toBe(teams.initialBudget + transfer.askingPrice);
+            expect(updatedBuyerTeam.budget).toBe(teams.initialBudget - transfer.askingPrice);
+        });
+
+        it('updates the seller and buyer team value', async () => {
+            const sellerTeam = await Team.findOne({ owner: initialPlayerObject.owner });
+            const updatedBuyerTeam = await Team.findById(buyerTeam._id);
+            const updatedPlayer = await Player.findOne({
+                _id: initialPlayerObject._id,
+                activeTransfer: { $exists: false }
+            });
+
+            const initialTeamValue = players.initialValue * players.initialCount;
+            expect(sellerTeam.value).toBe(initialTeamValue - initialPlayerObject.value);
+            expect(updatedBuyerTeam.value).toBe(initialTeamValue + updatedPlayer.value);
         });
     });
 });
