@@ -49,8 +49,8 @@ module.exports = {
         const { user } = res.locals;
         const { playerId } = req.body;
         try {
-            await playerService.buy(user, playerId);
-            res.json(createResponse(true));
+            const boughtPlayer = await playerService.buy(user, playerId);
+            res.json(createResponse(true, null, { player: boughtPlayer }));
         } catch (error) {
             next(error);
         }

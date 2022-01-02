@@ -147,6 +147,9 @@ async function buy(user, playerId) {
     if (!player) {
         throw new ServerError('Player not available for buying', 400);
     }
+    if (player.owner.toString() === buyerTeam.owner.toString()) {
+        throw new ServerError("Can't buy your own player", 400);
+    }
     if (transferData.askingPrice > buyerTeam.budget) {
         throw new ServerError('Team budget is less than player asking price', 400);
     }
@@ -164,15 +167,16 @@ async function buy(user, playerId) {
     // update buyer value in transfer data
     transferData.buyer = buyerId;
 
-    // calculate the new increase player value
-    const newPlayerValue = increasedPlayerValue(transferData.askingPrice);
+    const newPlayerValue = increasedPlayerValue(player.value);
     buyerTeam.value += newPlayerValue;
     // placement of this matters
     player.value = newPlayerValue;
 
     // update player owner and team data
-    player.team = buyerTeam;
+    player.team = buyerTeam._id;
     player.owner = buyerId;
+    // remove active transfer key from user
+    player.activeTransfer = undefined;
 
     await withTransaction(async () => {
         await transferData.save();
@@ -180,6 +184,21 @@ async function buy(user, playerId) {
         await buyerTeam.save();
         await sellerTeam.save();
     });
+
+    const { age, country, firstName, lastName, updatedAt, owner, team, type, value } = player;
+
+    return {
+        playerId,
+        age,
+        country,
+        firstName,
+        lastName,
+        updatedAt,
+        owner,
+        team,
+        type,
+        value
+    };
 }
 
 module.exports = {
