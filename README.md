@@ -1,8 +1,5 @@
 # Soccer Manager
 
-I have created the application as it was explained in the email. It was really fun and I learnt some new things too.
-I tried to create the best possible architecture and kept the project modular. I also used the best coding practices upto full extent.
-
 The application is deployed on heroku. [https://fantasy-soccer-th98.herokuapp.com](https://fantasy-soccer-th98.herokuapp.com)
 
 You can also browse the API documentation on Postman. [https://documenter.getpostman.com/view/3481116/UVRHiiCC](https://documenter.getpostman.com/view/3481116/UVRHiiCC)
